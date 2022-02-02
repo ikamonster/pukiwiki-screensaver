@@ -13,7 +13,9 @@
 
 ## インストール
 
-screensaver.inc.php を PukiWiki の plugin ディレクトリに配置してください。
+下記GitHubページからダウンロードした screensaver.inc.php を PukiWiki の plugin ディレクトリに配置してください。
+
+[https://github.com/ikamonster/pukiwiki-screensaver](https://github.com/ikamonster/pukiwiki-screensaver)
 
 ## 使い方
 
