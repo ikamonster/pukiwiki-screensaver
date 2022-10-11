@@ -1,7 +1,7 @@
 <?php
 /*
 PukiWiki - Yet another WikiWikiWeb clone.
-screensaver.inc.php, v1.0.2 2021 M.Taniguchi
+screensaver.inc.php, v1.1.0 2021 M.Taniguchi
 License: GPL v3 or (at your option) any later version
 
 スクリーンセーバー機能を実現するプラグイン。
@@ -9,8 +9,8 @@ License: GPL v3 or (at your option) any later version
 ブラウザー上でマウス・キーボード・タッチ操作がないまま一定時間経過すると、サイトの画面が単色で塗りつぶされます。
 操作を再開すると元に戻ります。
 
-非公開情報を扱うウィキにおいて、離席時の画面隠蔽に役立つかもしれません。
-ただし、簡易的な機能なので過信は禁物です。
+微妙な情報を扱うウィキにおいて、離席時の画面隠蔽に役立つかもしれません。
+ただし、簡易的な機能なので過信は禁物です。期待通り動作するか必ずご確認ください。
 
 【使い方】
 #screensaver
@@ -25,8 +25,8 @@ License: GPL v3 or (at your option) any later version
 
 /////////////////////////////////////////////////
 // スクリーンセーバープラグイン（screensaver.inc.php）
-if (!defined('PLUGIN_SCREENSAVER_TIMEOUT_SEC')) define('PLUGIN_SCREENSAVER_TIMEOUT_SEC', 0);        // スクリーンセーバーの起動時間（秒）。0なら無効
-if (!defined('PLUGIN_SCREENSAVER_COLOR'))       define('PLUGIN_SCREENSAVER_COLOR',      '#000000'); // 画面を塗りつぶす色のHTMLカラーコード
+if (!defined('PLUGIN_SCREENSAVER_TIMEOUT_SEC')) define('PLUGIN_SCREENSAVER_TIMEOUT_SEC', 0); // スクリーンセーバーの起動時間（秒）。0なら無効
+if (!defined('PLUGIN_SCREENSAVER_COLOR'))       define('PLUGIN_SCREENSAVER_COLOR',      ''); // 画面を塗りつぶす色のHTMLカラーコード（例：#808080）。空ならHTMLの背景色
 
 
 function plugin_screensaver_convert() {
@@ -40,36 +40,25 @@ function plugin_screensaver_convert() {
 		$included = true;
 
 		$timeout = (int)max((PLUGIN_SCREENSAVER_TIMEOUT_SEC * 1000), 1000);
-		$color = PLUGIN_SCREENSAVER_COLOR;
+		$color = PLUGIN_SCREENSAVER_COLOR ? "'" . PLUGIN_SCREENSAVER_COLOR . "'" : 'null';
 		$body .= <<<EOT
-<style>
-body > div#__PluginScreenSaver__ {
-	position: fixed !important;
-	top: 0 !important;
-	left: 0 !important;
-	width: 100vw !important;
-	height: 100vh !important;
-	max-width: 100vw !important;
-	max-height: 100vh !important;
-	margin: 0 !important;
-	padding: 0 !important;
-	overflow: hidden !important;
-	background: {$color} !important;
-	opacity: 1 !important;
-	visibility: visible !important;
-	z-index: 2147483647 !important;
-	user-select: none !important;
-	pointer-events: none !important;
-	display: none;
-}
-</style>
 <script>
 'use strict';
 let		pluginScreenSaverTimer = null;
 let		pluginScreenSaverEnabled = false;
-const	pluginScreenSaverEle = document.createElement('div');
+const	pluginScreenSaverEle = document.createElement('dialog');
+pluginScreenSaverEle.setAttribute('inert', true);
+pluginScreenSaverEle.style = "position:fixed !important;top:0 !important;left:0 !important;width:100vw !important;height:100vh !important;max-width:100vw !important;max-height:100vh !important;border:none !important;border-radius:0 !important;box-sizing:border-box !important;margin:0 !important;padding:0 !important;overflow:hidden !important;opacity:1 !important;visibility:visible !important;z-index:2147483647 !important;user-select:none !important;pointer-events:none !important;display:none;";
 
 document.addEventListener('DOMContentLoaded', (event) => {
+	if (!{$color}) {
+		let	color = window.getComputedStyle(document.documentElement, null).getPropertyValue('background');
+		if (!color) color = window.getComputedStyle(document.body, null).getPropertyValue('background');
+		if (color) pluginScreenSaverEle.style.background = color;
+	} else {
+		pluginScreenSaverEle.style.background = {$color};
+	}
+
 	pluginScreenSaverEle.setAttribute('id', '__PluginScreenSaver__');
 	document.body.insertBefore(pluginScreenSaverEle, document.body.firstElementChild);
 
@@ -87,6 +76,7 @@ function pluginScreenSaverStart() {
 	pluginScreenSaverTimer = null;
 	if (!pluginScreenSaverEnabled) {
 		pluginScreenSaverEle.style.display = 'block';
+		pluginScreenSaverEle.showModal();
 		pluginScreenSaverEnabled = true;
 	}
 }
@@ -96,6 +86,7 @@ function pluginScreenSaverReset(e = null) {
 
 	if (pluginScreenSaverEnabled) {
 		pluginScreenSaverEle.style.display = 'none';
+		pluginScreenSaverEle.close();
 		pluginScreenSaverEnabled = false;
 		if (e) e.preventDefault()
 	}
