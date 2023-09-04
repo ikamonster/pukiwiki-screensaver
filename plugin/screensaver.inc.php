@@ -1,7 +1,7 @@
 <?php
 /*
 PukiWiki - Yet another WikiWikiWeb clone.
-screensaver.inc.php, v1.2.0 2021 M.Taniguchi
+screensaver.inc.php, v1.2.1 2021 M.Taniguchi
 License: GPL v3 or (at your option) any later version
 
 スクリーンセーバー機能を実現するプラグイン。
@@ -83,7 +83,7 @@ function pluginScreenSaverStart() {
 		pluginScreenSaverEle.showModal();
 		pluginScreenSaverEnabled = true;
 	}
-}
+};
 
 function pluginScreenSaverReset(e = null) {
 	if (pluginScreenSaverTimer) clearTimeout(pluginScreenSaverTimer);
@@ -96,10 +96,12 @@ function pluginScreenSaverReset(e = null) {
 	}
 
 	pluginScreenSaverTimer = setTimeout(pluginScreenSaverStart, {$timeout});
-}
+};
 /*-->*/</script>
 EOT;
 	}
+
+	$body = preg_replace("/((\s|\n){1,})/i", ' ', $body);	// 連続空白を単一空白に（※「//」コメント非対応）
 
 	return $body;
 }
